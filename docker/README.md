@@ -27,6 +27,7 @@ The typical directory structure looks like above.
 * script: saves script to run, commands in Dockerfile will copy them into the image
 
 # Steps
+[![asciicast](https://asciinema.org/a/513305.svg)](https://asciinema.org/a/513305)
 ## Build your own Dockerfile
 * By fork this repo
 * By create a new branch
