@@ -18,4 +18,4 @@ RUN mkdir ./DPR/result && chmod +x run.sh
 VOLUME ./DPR/result
 
 # run the command
-CMD ["sh", "-c", "bash"]
+CMD ["sh", "-c", "run.sh"]
