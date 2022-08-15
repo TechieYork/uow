@@ -6,9 +6,8 @@ FROM nvcr.io/nvidia/pytorch:22.07-py3
 WORKDIR "/usr/uow/nlp"
 
 # install facebook dpr & dependices
-COPY test/ ./DPR/
-#RUN git clone https://github.com/facebookresearch/DPR
-#RUN pip install ./DPR
+RUN git clone https://github.com/facebookresearch/DPR
+RUN pip install ./DPR
 
 # copy run.py & run.sh to nlp directory
 COPY conf/ ./DPR/conf/

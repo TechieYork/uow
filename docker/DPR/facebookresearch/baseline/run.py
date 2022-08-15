@@ -158,7 +158,7 @@ def retrieve_result(path):
         position = line.find(target_str)
         if position == -1:
             continue
-        target_result = line[position + len(target_str):].strip().removeprefix("[").removesuffix("]")
+        target_result = line[position + len(target_str):].strip().lstrip("[").rstrip("]")
         accuracies = target_result.split(",")
         top20 = accuracies[20 - 1]
         top100 = accuracies[100 - 1]
