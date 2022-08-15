@@ -90,7 +90,7 @@ def run_embedding():
     best_model_file = retrieve_model(dpr_outputs_path)
     if best_model_file is None:
         print("Failed to find the best mode file from log")
-        return
+        return "", ""
     # output embedding file
     embedding_file = os.path.join(embedding_dest_path, "wiki_passages")
 

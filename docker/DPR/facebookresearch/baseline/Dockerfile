@@ -11,11 +11,12 @@ RUN pip install ./DPR
 
 # copy run.py & run.sh to nlp directory
 COPY conf/ ./DPR/conf/
-COPY run.py run.sh ./
+COPY run.py run.sh en_core_web_sm-2.3.0.tar.gz ./
+RUN pip install ./en_core_web_sm-2.3.0.tar.gz -i https://pypi.tuna.tsinghua.edu.cn/simple
 RUN mkdir ./DPR/result && chmod +x run.sh
 
 # mount volumes if needed
-VOLUME ./DPR/result
+VOLUME /usr/uow/nlp/DPR/result
 
 # run the command
-CMD ["sh", "-c", "run.sh"]
+CMD ["sh", "-c", "./run.sh"]
