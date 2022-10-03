@@ -1,12 +1,13 @@
 import sys
 import argparse
 import nltk
+import itertools
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTChar
 
 # argument setting
 parser = argparse.ArgumentParser(description='PDF data statistic')
-parser.add_argument('act', type=str, help='actions, e.g.:run, download', choices=["run", "download"])
+parser.add_argument('act', type=str, help='actions, e.g.:freq, occur, download', choices=["freq", "occur", "download"])
 parser.add_argument('--pdf', metavar='N', type=str, nargs='+', help='pdf files')
 parser.add_argument('--headers', metavar='N', type=str, nargs='+', default=['findings', 'results'], help='headers')
 parser.add_argument('--keywords', metavar='N', type=str, nargs='+', help='keywords')
@@ -14,12 +15,13 @@ parser.add_argument('--top', type=int, default=100, help='top count')
 parser.add_argument('--verbose', type=bool, default=False, action=argparse.BooleanOptionalAction, help='verbose')
 args = parser.parse_args()
 
+
 class PDFAnalyzer:
     def __init__(self, extractor, statistic):
         self.extractor = extractor
         self.statistic = statistic
 
-    def run(self, pdfs, headers, keywords, top):
+    def freq(self, pdfs, headers, keywords, top):
         # find all contents
         contents = ""
         for pdf in pdfs:
@@ -31,9 +33,31 @@ class PDFAnalyzer:
                 print(content)
 
         # calculate frequency
-        print("====== Top 100 frequency ======")
-        freq_dist = self.statistic.keyword_freq(contents, keywords, top)
-        print(freq_dist)
+        print("====== Top {} frequency ======".format(top))
+        keywords_appear = self.statistic.keywords(contents, keywords)
+        dist = nltk.FreqDist(keywords_appear)
+        keywords_top = dist.most_common(top)
+        print(keywords_top)
+        return
+
+    def occur(self, pdfs, headers, keywords, top):
+        # find all contents
+        contents = ""
+        for pdf in pdfs:
+            content = self.extractor.extract_specific_header_content(pdf, headers)
+            contents += " " + content
+
+            if args.verbose:
+                print("====== PDF: {} ======".format(pdf))
+                print(content)
+
+        # calculate frequency
+        print("====== Top {} occurring frequency ======".format(top))
+        keywords_group = self.statistic.keywords_group(contents, keywords)
+        dist = nltk.FreqDist(keywords_group)
+        keywords_group_top = dist.most_common(top)
+        print(keywords_group_top)
+        return
 
 
 class Extractor:
@@ -111,6 +135,9 @@ class Statistic:
     def tokenize(self, content):
         return nltk.word_tokenize(content)
 
+    def sent_tokenize(self, content):
+        return nltk.sent_tokenize(content, language='english')
+
     def remove_stop_words(self, words):
         words_without_stopwords = []
         stop_words = set(nltk.corpus.stopwords.words('english'))
@@ -132,11 +159,11 @@ class Statistic:
         word_tags = nltk.pos_tag(words)
 
         # filter tags
-        word_tags_after_filter = []
+        words_after_filter = []
         for word, tag in word_tags:
             if tag in allowed_tags:
-                word_tags_after_filter.append(word)
-        return word_tags_after_filter
+                words_after_filter.append(word)
+        return words_after_filter
 
     def tolower(self, words):
         words_lower = []
@@ -144,8 +171,8 @@ class Statistic:
             words_lower.append(word.lower())
         return words_lower
 
-    def keyword_freq(self, content, keywords, top):
-        # tokenization
+    def keywords(self, content, keywords):
+        # word tokenization
         words = self.tokenize(content)
 
         # remove stop words
@@ -166,18 +193,60 @@ class Statistic:
 
         # pos tagging & filtering
         tags = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
-        word_tags_after_filter = self.filter_pos_tags(words_filtered, tags)
+        return self.filter_pos_tags(words_filtered, tags)
 
-        dist = nltk.FreqDist(word_tags_after_filter)
-        return dist.most_common(top)
+    def keywords_group(self, content, keywords):
+        # sentence tokenization
+        sents = self.sent_tokenize(content)
+
+        # prepare grouped sentences
+        sent_groups = []
+        for index in range(0, len(sents)):
+            if index == 0 and len(sents) == 1:
+                sent_groups.append([sents[index]])
+            elif index == 0 and len(sents) > 1:
+                sent_groups.append([sents[index], sents[index+1]])
+            elif index == len(sents) - 1:
+                sent_groups.append([sents[index-1], sents[index]])
+            else:
+                sent_groups.append([sents[index-1], sents[index], sents[index+1]])
+
+        # extract word occurring
+        combs = []
+        for group in sent_groups:
+            # concatenate sentences to string
+            sent_content = ''.join(group)
+
+            # pre-process sentence content
+            keywords_appear = self.keywords(sent_content, keywords)
+
+            # remove duplicate keywords
+            keywords_found = list(dict.fromkeys(keywords_appear))
+
+            # generate combinations, the maximum repeat is 3
+            repeat = 3
+            if len(keywords_found) < 3:
+                repeat = len(keywords_found)
+            group_combs = itertools.combinations(keywords_found, repeat)
+            for group_comb in group_combs:
+                sorted_group_comb = list(group_comb)
+                sorted_group_comb.sort()
+                if len(sorted_group_comb) == 0:
+                    continue
+                print('|'.join(sorted_group_comb))
+                combs.append('|'.join(sorted_group_comb))
+        return combs
 
 
 def main():
     # make action
     match args.act:
-        case 'run':
+        case 'freq':
             analyzer = PDFAnalyzer(extractor=Extractor(), statistic=Statistic())
-            analyzer.run(args.pdf, args.headers, args.keywords, args.top)
+            analyzer.freq(args.pdf, args.headers, args.keywords, args.top)
+        case 'occur':
+            analyzer = PDFAnalyzer(extractor=Extractor(), statistic=Statistic())
+            analyzer.occur(args.pdf, args.headers, args.keywords, args.top)
         case 'download':
             nltk.download()
 
