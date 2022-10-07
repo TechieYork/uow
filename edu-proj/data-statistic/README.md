@@ -62,7 +62,7 @@ Refer to NLTK downloading in the next section.
 ```
 --pdf         => PDF file list to be processed
 --headers     => header names for searching
---keywords    => keywords list used in statistic
+--keywords    => keywords list used in statistic, empty keywords means all
 --top         => numbers of top results returned, for 'freq' return top keywords, for 'occur' return top keywords group
 --verbose     => more detailed output will be printed
 ```

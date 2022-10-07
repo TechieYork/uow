@@ -1,3 +1,4 @@
+import string
 import sys
 import argparse
 import nltk
@@ -10,7 +11,7 @@ parser = argparse.ArgumentParser(description='PDF data statistic')
 parser.add_argument('act', type=str, help='actions, e.g.:freq, occur, download', choices=["freq", "occur", "download"])
 parser.add_argument('--pdf', metavar='N', type=str, nargs='+', help='pdf files')
 parser.add_argument('--headers', metavar='N', type=str, nargs='+', default=['findings', 'results'], help='headers')
-parser.add_argument('--keywords', metavar='N', type=str, nargs='+', help='keywords')
+parser.add_argument('--keywords', metavar='N', type=str, nargs='+', default=[], help='keywords，empty keywords means all')
 parser.add_argument('--top', type=int, default=100, help='top count')
 parser.add_argument('--verbose', type=bool, default=False, action=argparse.BooleanOptionalAction, help='verbose')
 args = parser.parse_args()
@@ -144,6 +145,8 @@ class Statistic:
         for word in words:
             if word in stop_words:
                 continue
+            if word in string.punctuation:
+                continue
             words_without_stopwords.append(word)
         return words_without_stopwords
 
@@ -185,11 +188,15 @@ class Statistic:
         keywords_after_stemming = self.tolower(keywords_after_stemming)
 
         # filter keywords
-        keywords_set = set(keywords_after_stemming)
         words_filtered = []
-        for word in words_after_stemming:
-            if word in keywords_set:
-                words_filtered.append(word)
+        if len(keywords) != 0:
+            keywords_set = set(keywords_after_stemming)
+            words_filtered = []
+            for word in words_after_stemming:
+                if word in keywords_set:
+                    words_filtered.append(word)
+        else:
+            words_filtered = words_after_stemming
 
         # pos tagging & filtering
         tags = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
@@ -233,7 +240,6 @@ class Statistic:
                 sorted_group_comb.sort()
                 if len(sorted_group_comb) == 0:
                     continue
-                print('|'.join(sorted_group_comb))
                 combs.append('|'.join(sorted_group_comb))
         return combs
 
