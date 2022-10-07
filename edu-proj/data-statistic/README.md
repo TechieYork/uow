@@ -15,6 +15,17 @@ This project is to help analyze data of pdf file and generate statistic.
     #           (e.g. Word group 1 occurs in Paper 1 & 6).
 ```
 
+# Limitation
+The header section is extracted in the following steps.
+
+* Step 1. word matching: searching the keywords given by command line options in the first 13 chars of each sentence.
+  * e.g.: findings, results
+* Step 2. sentence concatenation: after the header is found, the font name & size will be recorded.
+  The following sentence will be joined to the content until the next first char's font name & size of next sentence is the same as the recorded one.
+* Step 3. content is considered as the header section to be processed.
+
+Notice: This procedure may lead to wrong content to be extracted, since PDF is formatted in an unstructured way and no python package offers the ability to achieve this. 
+
 # Pre-requisite
 ## pdfminer installation
 [Refer to Github](https://github.com/pdfminer/pdfminer.six)
@@ -24,6 +35,10 @@ This project is to help analyze data of pdf file and generate statistic.
 Refer to NLTK downloading in the next section.
 * Step 1. run the download command.
 * Step 2. click 'download' button to continue, it may take several minutes to tens of minutes depend on the network.
+
+# Test platform
+* MacOS: 12.5.1
+* Python: 3.10
 
 # Command line
 ## NLTK downloading
