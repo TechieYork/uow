@@ -147,15 +147,17 @@ class Statistic:
                 continue
             if word in string.punctuation:
                 continue
+            if len(word) == 1:
+                continue
             words_without_stopwords.append(word)
         return words_without_stopwords
 
-    def stemming(self, words):
-        words_after_stemming = []
-        porter_stemming = nltk.stem.PorterStemmer()
+    def lemmatize(self, words):
+        words_after_lem = []
+        lem = nltk.stem.WordNetLemmatizer()
         for word in words:
-            words_after_stemming.append(porter_stemming.stem(word))
-        return words_after_stemming
+            words_after_lem.append(lem.lemmatize(word))
+        return words_after_lem
 
     def filter_pos_tags(self, words, allowed_tags):
         # pos tag
@@ -181,22 +183,22 @@ class Statistic:
         # remove stop words
         words_without_stopwords = self.remove_stop_words(words)
 
-        # stemming
-        words_after_stemming = self.stemming(words_without_stopwords)
-        words_after_stemming = self.tolower(words_after_stemming)
-        keywords_after_stemming = self.stemming(keywords)
-        keywords_after_stemming = self.tolower(keywords_after_stemming)
+        # lemmatize
+        words_after_lem = self.lemmatize(words_without_stopwords)
+        words_after_lem = self.tolower(words_after_lem)
+        keywords_after_lem = self.lemmatize(keywords)
+        keywords_after_lem = self.tolower(keywords_after_lem)
 
         # filter keywords
         words_filtered = []
         if len(keywords) != 0:
-            keywords_set = set(keywords_after_stemming)
+            keywords_set = set(keywords_after_lem)
             words_filtered = []
-            for word in words_after_stemming:
+            for word in words_after_lem:
                 if word in keywords_set:
                     words_filtered.append(word)
         else:
-            words_filtered = words_after_stemming
+            words_filtered = words_after_lem
 
         # pos tagging & filtering
         tags = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
