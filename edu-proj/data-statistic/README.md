@@ -58,11 +58,17 @@ Refer to NLTK downloading in the next section.
 > python pdf-data-statistic.py occur --pdf ./Tondeur\ et\ al\ 2013.pdf ./Butler\ \&\ Leahy\ 2020.pdf --headers findings results --keywords finding present ict tpack --top 50
 ```
 
+## Keywords Collocation
+### Usage Example
+```shell
+> python pdf-data-statistic.py col --pdf ./Tondeur\ et\ al\ 2013.pdf ./Butler\ \&\ Leahy\ 2020.pdf --headers findings results --keywords finding present ict tpack --top 50 
+```
+
 ## Options
 ```
 --pdf         => PDF file list to be processed
 --headers     => header names for searching
---keywords    => keywords list used in statistic, empty keywords means all
+--keywords    => keywords list used in statistic, empty keywords means all words are taken into account
 --top         => numbers of top results returned, for 'freq' return top keywords, for 'occur' return top keywords group
 --verbose     => more detailed output will be printed
 ```

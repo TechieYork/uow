@@ -8,10 +8,12 @@ from pdfminer.layout import LTTextContainer, LTChar
 
 # argument setting
 parser = argparse.ArgumentParser(description='PDF data statistic')
-parser.add_argument('act', type=str, help='actions, e.g.:freq, occur, download', choices=["freq", "occur", "download"])
+parser.add_argument('act', type=str, help='actions, e.g.:freq, occur, download',
+                    choices=["freq", "occur", "col", "download"])
 parser.add_argument('--pdf', metavar='N', type=str, nargs='+', help='pdf files')
 parser.add_argument('--headers', metavar='N', type=str, nargs='+', default=['findings', 'results'], help='headers')
-parser.add_argument('--keywords', metavar='N', type=str, nargs='+', default=[], help='keywords，empty keywords means all')
+parser.add_argument('--keywords', metavar='N', type=str, nargs='+', default=[],
+                    help='keywords，empty keywords means all')
 parser.add_argument('--top', type=int, default=100, help='top count')
 parser.add_argument('--verbose', type=bool, default=False, action=argparse.BooleanOptionalAction, help='verbose')
 args = parser.parse_args()
@@ -52,13 +54,36 @@ class PDFAnalyzer:
                 print("====== PDF: {} ======".format(pdf))
                 print(content)
 
-        # calculate frequency
+        # calculate occurring
         print("====== Top {} occurring frequency ======".format(top))
         keywords_group = self.statistic.keywords_group(contents, keywords)
         dist = nltk.FreqDist(keywords_group)
         keywords_group_top = dist.most_common(top)
         print(keywords_group_top)
         return
+
+    def collocation(self, pdfs, headers, keywords, top):
+        # find all contents
+        contents = ""
+        for pdf in pdfs:
+            content = self.extractor.extract_specific_header_content(pdf, headers)
+            contents += " " + content
+
+            if args.verbose:
+                print("====== PDF: {} ======".format(pdf))
+                print(content)
+
+        # calculate occurring
+        print("====== Top {} collocation frequency ======".format(top))
+        # print("content: {}".format(self.statistic.keywords(contents, keywords)))
+        trigram_measures = nltk.collocations.TrigramAssocMeasures()
+        finder = nltk.collocations.TrigramCollocationFinder.from_words(
+            self.statistic.keywords(contents, keywords), window_size=3)
+        # colls = finder.nbest(trigram_measures.likelihood_ratio, top)
+        # print(list(nltk.trigrams(self.statistic.keywords(contents, keywords))))
+        # print(colls)
+        sorted_freq_dist = sorted(finder.ngram_fd.items(), key=lambda t: (-t[1], t[0]))[:top]
+        print(sorted_freq_dist)
 
 
 class Extractor:
@@ -255,6 +280,9 @@ def main():
         case 'occur':
             analyzer = PDFAnalyzer(extractor=Extractor(), statistic=Statistic())
             analyzer.occur(args.pdf, args.headers, args.keywords, args.top)
+        case 'col':
+            analyzer = PDFAnalyzer(extractor=Extractor(), statistic=Statistic())
+            analyzer.collocation(args.pdf, args.headers, args.keywords, args.top)
         case 'download':
             nltk.download()
 
