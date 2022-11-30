@@ -33,17 +33,20 @@ class PDFAnalyzer:
         # find all contents
         contents = ""
         for pdf in pdfs:
-            if args.verbose:
-                print("====== PDF: {} ======".format(pdf))
-
             content = self.extractor.extract_specific_abstract_content(pdf)
             contents += " " + content
             if args.verbose:
                 print(content)
-                # time.sleep(1000)
+
+            # calculate frequency
+            print("====== Top {} frequency: {} ======".format(top, pdf))
+            keywords_appear = self.statistic.keywords(content, keywords)
+            dist = nltk.FreqDist(keywords_appear)
+            keywords_top = dist.most_common(top)
+            print(keywords_top)
 
         # calculate frequency
-        print("====== Top {} frequency ======".format(top))
+        print("====== Top {} frequency total ======".format(top))
         keywords_appear = self.statistic.keywords(contents, keywords)
         dist = nltk.FreqDist(keywords_appear)
         keywords_top = dist.most_common(top)
@@ -54,17 +57,21 @@ class PDFAnalyzer:
         # find all contents
         contents = ""
         for pdf in pdfs:
-            if args.verbose:
-                print("====== PDF: {} ======".format(pdf))
-
             content = self.extractor.extract_specific_abstract_content(pdf)
             contents += " " + content
 
             if args.verbose:
                 print(content)
 
+            # calculate occurring
+            print("====== Top {} occurring frequency: {} ======".format(top, pdf))
+            keywords_group = self.statistic.keywords_group(content, keywords)
+            dist = nltk.FreqDist(keywords_group)
+            keywords_group_top = dist.most_common(top)
+            print(keywords_group_top)
+
         # calculate occurring
-        print("====== Top {} occurring frequency ======".format(top))
+        print("====== Top {} occurring frequency total ======".format(top))
         keywords_group = self.statistic.keywords_group(contents, keywords)
         dist = nltk.FreqDist(keywords_group)
         keywords_group_top = dist.most_common(top)
@@ -84,8 +91,15 @@ class PDFAnalyzer:
             if args.verbose:
                 print(content)
 
+            # calculate occurring
+            print("====== Top {} collocation frequency: {} ======".format(top, pdf))
+            finder = nltk.collocations.TrigramCollocationFinder.from_words(
+                self.statistic.keywords(content, keywords), window_size=3)
+            sorted_freq_dist = sorted(finder.ngram_fd.items(), key=lambda t: (-t[1], t[0]))[:top]
+            print(sorted_freq_dist)
+
         # calculate occurring
-        print("====== Top {} collocation frequency ======".format(top))
+        print("====== Top {} collocation frequency total ======".format(top))
         # print("content: {}".format(self.statistic.keywords(contents, keywords)))
         trigram_measures = nltk.collocations.TrigramAssocMeasures()
         finder = nltk.collocations.TrigramCollocationFinder.from_words(
