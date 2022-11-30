@@ -1,0 +1,2 @@
+====== Top 30 frequency ======
+[('student', 375), ('participant', 230), ('teacher', 185), ('group', 174), ('learning', 139), ('class', 139), ('use', 134), ('classroom', 110), ('technology', 109), ('used', 106), ('time', 96), ('teaching', 90), ('using', 85), ('lesson', 80), ('pre-service', 79), ('problem', 77), ('course', 77), ('video', 77), ('stated', 77), ('activity', 76), ('project', 75), ('instructor', 65), ('ipad', 65), ('way', 60), ('code', 59), ('question', 57), ('environment', 57), ('example', 56), ('work', 55), ('information', 55)]

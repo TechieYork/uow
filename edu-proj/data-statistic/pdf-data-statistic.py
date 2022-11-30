@@ -1,8 +1,12 @@
+import os
 import string
 import sys
 import argparse
+import time
+
 import nltk
 import itertools
+from collections.abc import Iterable
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTChar
 
@@ -10,7 +14,8 @@ from pdfminer.layout import LTTextContainer, LTChar
 parser = argparse.ArgumentParser(description='PDF data statistic')
 parser.add_argument('act', type=str, help='actions, e.g.:freq, occur, download',
                     choices=["freq", "occur", "col", "download"])
-parser.add_argument('--pdf', metavar='N', type=str, nargs='+', help='pdf files')
+parser.add_argument('--pdf', type=str, nargs='+', help='pdf files')
+parser.add_argument('--path', type=str, nargs='+', help='pdf file path')
 parser.add_argument('--headers', metavar='N', type=str, nargs='+', default=['findings', 'results'], help='headers')
 parser.add_argument('--keywords', metavar='N', type=str, nargs='+', default=[],
                     help='keywords，empty keywords means all')
@@ -28,12 +33,15 @@ class PDFAnalyzer:
         # find all contents
         contents = ""
         for pdf in pdfs:
+            if args.verbose:
+                print("====== PDF: {} ======".format(pdf))
+
             content = self.extractor.extract_specific_header_content(pdf, headers)
             contents += " " + content
 
             if args.verbose:
-                print("====== PDF: {} ======".format(pdf))
                 print(content)
+                # time.sleep(1000)
 
         # calculate frequency
         print("====== Top {} frequency ======".format(top))
@@ -47,11 +55,13 @@ class PDFAnalyzer:
         # find all contents
         contents = ""
         for pdf in pdfs:
+            if args.verbose:
+                print("====== PDF: {} ======".format(pdf))
+
             content = self.extractor.extract_specific_header_content(pdf, headers)
             contents += " " + content
 
             if args.verbose:
-                print("====== PDF: {} ======".format(pdf))
                 print(content)
 
         # calculate occurring
@@ -66,11 +76,13 @@ class PDFAnalyzer:
         # find all contents
         contents = ""
         for pdf in pdfs:
+            if args.verbose:
+                print("====== PDF: {} ======".format(pdf))
+
             content = self.extractor.extract_specific_header_content(pdf, headers)
             contents += " " + content
 
             if args.verbose:
-                print("====== PDF: {} ======".format(pdf))
                 print(content)
 
         # calculate occurring
@@ -87,39 +99,63 @@ class PDFAnalyzer:
 
 
 class Extractor:
+    bolds = ["Bold", "bold"]
+    bolds_endwith = [".B", "B"]
+
     def extract_element_font_and_size(self, element):
-        # get font and size of the first char of element
         for text_line in element:
+            if not text_line:
+                continue
+            if not isinstance(text_line, Iterable):
+                continue
             for character in text_line:
+                if character is None:
+                    continue
                 if isinstance(character, LTChar):
-                    return character.fontname, character.size
+                    bold = False
+                    for b in Extractor.bolds:
+                        if character.fontname.find(b) != -1:
+                            bold = True
+                    for be in Extractor.bolds_endwith:
+                        if character.fontname.endswith(be):
+                            bold = True
+                    return character.fontname, round(character.size, 4), bold
+        return "", 0, False
 
     def extract_specific_header_content(self, pdf, headers):
         header_found = False
         ending_found = False
         font = ""
         size = ""
+        bold = False
         content = ""
 
+        first_page = True
         for page_layout in extract_pages(pdf):
+            if first_page:
+                first_page = False
+                continue
+
             for element in page_layout:
                 if isinstance(element, LTTextContainer):
                     if not header_found:
                         # convert element text to lower case
                         lowercase = element.get_text().lower()
-                        if len(lowercase) > 13:
-                            lowercase = element.get_text()[0:13].lower()
+                        if len(lowercase) > 17:
+                            lowercase = element.get_text()[0:17].lower()
 
                         # check if element contains header string, e.g.: "findings", "results"
                         for header in headers:
                             # search for header
                             if lowercase.find(header) == -1:
                                 continue
-                            header_found = True
 
                             # get font and size of header
-                            font, size = self.extract_element_font_and_size(element)
-                            break
+                            font, size, bold = self.extract_element_font_and_size(element)
+                            # print("header: ", lowercase, font, size, bold)
+                            if bold:
+                                header_found = True
+                                break
 
                     # if header not found, continue searching
                     if not header_found:
@@ -135,8 +171,9 @@ class Extractor:
 
                     # if header found, and content length is not zero, concatenate element text to content
                     # get element font & size
-                    cur_font, cur_size = self.extract_element_font_and_size(element)
-                    if cur_font == font and cur_size == size:
+                    cur_font, cur_size, cur_bold = self.extract_element_font_and_size(element)
+                    # print("======", cur_font, cur_size, cur_bold, element.get_text())
+                    if cur_font == font and cur_size == size and bold:
                         ending_found = True
                         break
 
@@ -272,6 +309,17 @@ class Statistic:
 
 
 def main():
+    if args.pdf is None:
+        args.pdf = []
+
+    for p in args.path:
+        if args.path is not None:
+            r = os.walk(p)
+            for path, dirs, names in r:
+                for name in names:
+                    if name.startswith("."):
+                        continue
+                    args.pdf.append(os.path.join(path, name))
     # make action
     match args.act:
         case 'freq':
