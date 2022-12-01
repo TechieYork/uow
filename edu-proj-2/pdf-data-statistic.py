@@ -240,6 +240,7 @@ class Statistic:
     #       b. Words occurring together – We agreed to start with the top 30 groups of words occurring together
     #           in sentences. Also, which articles these groups of words appear
     #           (e.g. Word group 1 occurs in Paper 1 & 6).
+    words = set(i.lower() for i in nltk.corpus.words.words())
 
     def tokenize(self, content):
         return nltk.word_tokenize(content)
@@ -267,6 +268,10 @@ class Statistic:
             words_after_lem.append(lem.lemmatize(word))
         return words_after_lem
 
+    def lemmatize_one(self, word):
+        lem = nltk.stem.WordNetLemmatizer()
+        return lem.lemmatize(word)
+
     def filter_pos_tags(self, words, allowed_tags):
         # pos tag
         word_tags = nltk.pos_tag(words)
@@ -291,6 +296,22 @@ class Statistic:
         # remove stop words
         words_without_stopwords = self.remove_stop_words(words)
 
+        # handle cross line words
+        index = 0
+        for i in range(len(words_without_stopwords)):
+            cur_word = words_without_stopwords[i].lower()
+            exist = self.lemmatize_one(cur_word) in Statistic.words
+            if not exist and i < len(words_without_stopwords) - 1:
+                # print("not exist word: {}".format(cur_word, self.lemmatize_one(cur_word)))
+                # remove suffix '-' and build new word
+                cur_word = cur_word.rstrip('-')
+                next_word = words_without_stopwords[i + 1].lower()
+                new_word = cur_word + next_word
+                # print("build new word: {} {}".format(new_word, self.lemmatize_one(new_word)))
+                if not (self.lemmatize_one(new_word) in Statistic.words):
+                    continue
+                # print("=== new word: {}".format(new_word))
+
         # lemmatize
         words_after_lem = self.lemmatize(words_without_stopwords)
         words_after_lem = self.tolower(words_after_lem)
@@ -301,7 +322,6 @@ class Statistic:
         words_filtered = []
         if len(keywords) != 0:
             keywords_set = set(keywords_after_lem)
-            words_filtered = []
             for word in words_after_lem:
                 if word in keywords_set:
                     words_filtered.append(word)

@@ -266,7 +266,6 @@ class Statistic:
         words_filtered = []
         if len(keywords) != 0:
             keywords_set = set(keywords_after_lem)
-            words_filtered = []
             for word in words_after_lem:
                 if word in keywords_set:
                     words_filtered.append(word)
