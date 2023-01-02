@@ -3,17 +3,20 @@ import string
 import sys
 import argparse
 import time
+from math import log
 
 import nltk
 import itertools
 from collections.abc import Iterable
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTChar
+import matplotlib.pyplot as plt
+import networkx as nx
 
 # argument setting
 parser = argparse.ArgumentParser(description='PDF data statistic')
 parser.add_argument('act', type=str, help='actions, e.g.:freq, occur, download',
-                    choices=["freq", "occur", "col", "download"])
+                    choices=["freq", "occur", "col", "graph", "download"])
 parser.add_argument('--pdf', type=str, nargs='+', help='pdf files')
 parser.add_argument('--path', type=str, nargs='+', help='pdf file path')
 parser.add_argument('--headers', metavar='N', type=str, nargs='+', default=['findings', 'results'], help='headers')
@@ -52,7 +55,7 @@ class PDFAnalyzer:
         dist = nltk.FreqDist(keywords_appear)
         keywords_top = dist.most_common(top)
         print(keywords_top)
-        return
+        return keywords_top
 
     def occur(self, pdfs, headers, keywords, top):
         # find all contents
@@ -77,7 +80,7 @@ class PDFAnalyzer:
         dist = nltk.FreqDist(keywords_group)
         keywords_group_top = dist.most_common(top)
         print(keywords_group_top)
-        return
+        return keywords_group_top
 
     def collocation(self, pdfs, headers, keywords, top):
         # find all contents
@@ -107,6 +110,218 @@ class PDFAnalyzer:
         # print(colls)
         sorted_freq_dist = sorted(finder.ngram_fd.items(), key=lambda t: (-t[1], t[0]))[:top]
         print(sorted_freq_dist)
+        return sorted_freq_dist
+
+    def word_doc_graph(self, pdfs, headers, keywords, top):
+        # find all keywords
+        keywords_top = self.freq(pdfs, headers, keywords, top)
+        keywords_set = set()
+        for keyword in keywords_top:
+            keywords_set.add(keyword[0])
+        print("====== keywords set ======")
+        print(keywords_set)
+
+        # PMI between words
+        word_pair_pmi = self.word_pmi(pdfs, headers, keywords_set)
+
+        # TF-IDF between word and doc
+        word_tfidf = self.word_doc_tfidf(pdfs, headers, keywords_set)
+
+        G = nx.Graph()
+
+        # add nodes
+        for keyword in keywords_set:
+            G.add_node(keyword)
+        for pdf in pdfs:
+            path, file = os.path.split(pdf)
+            name, _ = os.path.splitext(file)
+            G.add_node(name)
+
+        color_map = []
+        for node in G:
+            if node in keywords_set:
+                color_map.append("blue")
+            else:
+                color_map.append("green")
+
+        pos = nx.circular_layout(G)  # positions for all nodes - seed for reproducibility
+        nx.draw_networkx_nodes(G, pos, node_size=1000, alpha=0.5, node_color=color_map)
+        nx.draw_networkx_labels(G, pos, font_size=8)
+
+        # build word nodes edges
+        for key in word_pair_pmi:
+            temp = key.split("|")
+            pmi = word_pair_pmi[key]
+            word_i = temp[0]
+            word_j = temp[1]
+            # if pmi < 0.5:
+            #     continue
+            G.add_edge(word_i, word_j, weight=pmi)
+            nx.draw_networkx_edges(G, pos, edgelist=[(word_i, word_j)], width=pmi * 2, alpha=0.3, edge_color="m")
+
+        # build word doc edges
+        for key in word_tfidf:
+            temp = key.split("|")
+            tfidf = word_tfidf[key]
+            doc = temp[0]
+            word = temp[1]
+            G.add_edge(word, doc, weight=tfidf)
+            nx.draw_networkx_edges(G, pos, edgelist=[(word, doc)], width=tfidf/10, alpha=0.3, edge_color="g")
+
+        ax = plt.gca()
+        ax.margins(0.08)
+        plt.axis("off")
+        plt.tight_layout()
+        plt.show()
+
+    def word_pmi(self, pdfs, headers, keywords_set):
+        # find all contents and pre-processing
+        content_windows = []
+        window_size = 20
+        tags = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
+
+        for pdf in pdfs:
+            content = self.extractor.extract_specific_header_content(pdf, headers)
+            words = self.statistic.tokenize(content)
+            length = len(words)
+            if length < window_size:
+                words_without_stopwords = self.statistic.remove_stop_words(words)
+                words_after_lem = self.statistic.lemmatize(words_without_stopwords)
+                words_after_lem = self.statistic.tolower(words_after_lem)
+                words_after_filter = self.statistic.filter_pos_tags(words_after_lem, tags)
+                content_windows.append(words_after_filter)
+                # print(words_after_filter)
+            else:
+                for index in range(length - window_size + 1):
+                    window = words[index: index + window_size]
+                    words_without_stopwords = self.statistic.remove_stop_words(window)
+                    words_after_lem = self.statistic.lemmatize(words_without_stopwords)
+                    words_after_lem = self.statistic.tolower(words_after_lem)
+                    words_after_filter = self.statistic.filter_pos_tags(words_after_lem, tags)
+                    content_windows.append(words_after_filter)
+                    # print(words_after_filter)
+
+        # calculate freq & find pairs
+        word_window_freq = {}
+        word_pairs = {}
+        for window in content_windows:
+            words = []
+            for word in window:
+                if word not in keywords_set:
+                    continue
+                if word in word_window_freq:
+                    word_window_freq[word] += 1
+                else:
+                    word_window_freq[word] = 1
+                words.append(word)
+
+            if len(words) < 2:
+                continue
+            words_set = set(words)
+            words = (list(words_set))
+            words.sort()
+            pairs = itertools.combinations(words, 2)
+            for p in pairs:
+                key = "{}|{}".format(p[0], p[1])
+                if key in word_pairs:
+                    word_pairs[key] += 1
+                else:
+                    word_pairs[key] = 1
+
+        print("====== word window frequency ======")
+        print(word_window_freq)
+        print("====== word pairs ======")
+        print(word_pairs)
+
+        # pmi
+        word_pair_pmi = {}
+        windows_number = len(content_windows)
+        for key in word_pairs:
+            temp = key.split("|")
+            word_i = temp[0]
+            word_j = temp[1]
+            count = word_pairs[key]
+            word_freq_i = word_window_freq[word_i]
+            word_freq_j = word_window_freq[word_j]
+            pmi = log((1.0 * count / windows_number) /
+                      (1.0 * word_freq_i * word_freq_j / (windows_number * windows_number)))
+            if pmi <= 0:
+                continue
+            word_pair_pmi[key] = pmi
+
+        print("====== word pair PMI ======")
+        print(word_pair_pmi)
+        return word_pair_pmi
+
+    def word_doc_tfidf(self, pdfs, headers, keywords_set):
+        # find all contents and pre-processing
+        doc_words = {}
+        tags = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
+
+        for pdf in pdfs:
+            content = self.extractor.extract_specific_header_content(pdf, headers)
+            words = self.statistic.tokenize(content)
+            words_without_stopwords = self.statistic.remove_stop_words(words)
+            words_after_lem = self.statistic.lemmatize(words_without_stopwords)
+            words_after_lem = self.statistic.tolower(words_after_lem)
+            words_after_filter = self.statistic.filter_pos_tags(words_after_lem, tags)
+
+            path, file = os.path.split(pdf)
+            name, _ = os.path.splitext(file)
+            doc_words[name] = words_after_filter
+
+        # word freq (TF term frequency)
+        doc_word_freq = {}
+        for key in doc_words:
+            words = doc_words[key]
+            for word in words:
+                if word not in keywords_set:
+                    continue
+                freq_key = "|".join((key, word))
+                if freq_key in doc_word_freq:
+                    doc_word_freq[freq_key] += 1
+                else:
+                    doc_word_freq[freq_key] = 1
+        print("====== word frequency (TF in TFIDF, term frequency) ======")
+        print(doc_word_freq)
+
+        # doc word freq (IDF inverse document frequency)
+        word_doc_freq = {}
+        for key in doc_words:
+            words = doc_words[key]
+            for word in words:
+                if word not in keywords_set:
+                    continue
+                if word in word_doc_freq:
+                    doc_set = word_doc_freq[word]
+                    doc_set.add(key)
+                    word_doc_freq[word] = doc_set
+                else:
+                    doc_set = set()
+                    doc_set.add(key)
+                    word_doc_freq[word] = doc_set
+        print("====== word-doc frequency (used to calculate TFIDF) ======")
+        print(word_doc_freq)
+
+        # calculate TFIDF
+        tfidf = {}
+        for key in doc_words:
+            words = doc_words[key]
+            word_doc_set = set()
+            for word in words:
+                if word not in keywords_set:
+                    continue
+                freq_key = "|".join((key, word))
+                if freq_key in word_doc_set:
+                    continue
+                tf = doc_word_freq[freq_key]
+                idf = log(1.0 * len(pdfs) / len(word_doc_freq[word]))
+                tfidf[freq_key] = tf * idf
+                word_doc_set.add(freq_key)
+
+        print("====== Final TFIDF ======")
+        print(tfidf)
+        return tfidf
 
 
 class Extractor:
@@ -134,6 +349,10 @@ class Extractor:
         return "", 0, False
 
     def extract_specific_header_content(self, pdf, headers):
+        if pdf.endswith(".txt"):
+            f = open(pdf, "r")
+            return f.read()
+
         header_found = False
         ending_found = False
         font = ""
@@ -341,6 +560,9 @@ def main():
         case 'col':
             analyzer = PDFAnalyzer(extractor=Extractor(), statistic=Statistic())
             analyzer.collocation(args.pdf, args.headers, args.keywords, args.top)
+        case 'graph':
+            analyzer = PDFAnalyzer(extractor=Extractor(), statistic=Statistic())
+            analyzer.word_doc_graph(args.pdf, args.headers, args.keywords, args.top)
         case 'download':
             nltk.download()
 

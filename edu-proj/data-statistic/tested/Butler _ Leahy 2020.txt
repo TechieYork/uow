@@ -1,0 +1,65 @@
+FINDINGS
+In presenting the findings only a small number of data extracts that are representative and illustrate the findings most clearly are presented due to restrictions of word count. Additional data extracts for each section in the findings are included in the supplementary material (SM) which will be referenced by indicating the cell number in the spreadsheet (eg, SM:C6).
+Understandings of CT
+The ability of the preservice teachers to identify CT in the children they engaged with over the 3 weeks of the project, as well as their knowledge of how to develop children's CT were interpreted as indicators of overall understandings of CT (cf. Table S1). Through engaging with the children, the preservice teachers not only further deepened their understanding of CT but in the process developed their ability to design a learning environment and plan the strategies required so that their students in turn would develop CT.
+Ability to identify CT in children's practice
+As part of their write-up following the class-based project, the preservice teachers were asked to present two or three emergent themes with supporting evidence from their experiences.
+
+COMPUTATIONAL THINKING: A CONSTRUCTIONIST
+APPROACH | 1069
+Across the two cohorts, the most prominent themes presented were algorithmic thinking (30%), decomposition (25%) and debugging (24%). Abstraction (14%) and generalisation (7%) were reported to a lesser extent. The emergence of this pattern was similarly explained in each of the focus groups; ‘I think we saw some of them and not others. ... and it was kind of the same ones coming up all the time ... algorithmic thinking, debugging, decomposition, abstraction’ (Focus_Group#3) (See Table 3 and Figure 2).
+Analysis highlighted strong understandings of CT, particularly in relation to algorithmic thinking, decomposition and debugging. This was demonstrated through their ability to iden- tify and track the development of components of CT among the children they engaged with across the duration of the project. They also exhibited some understanding of the interrela- tionship between the components of CT and of the connections between constructionism and the development of CT.
+Preservice teachers' understanding of CT was evidenced through the examples they pre- sented in their written accounts, the majority of which began by signalling the children's limited or lack of a skill. For example, limitations in relation to decomposition and debugging are highlighted in the following extract. (also cf. SM:C6)
+At first, the children became quite overwhelmed by the number of small tasks in- volved in larger tasks. For example, when programming Milo to move to one end of the table and back, the children, rather than breaking this down into sizeable portions, became frazzled and ‘stuck’. (PST#19)
+T A B L E 3 The number of preservice teachers who included each element of computational thinking in the write-up of their classroom experience
+# preservice 9 11 4 10 7 teachers in 2019
+Total 13 23 6 28 22
+   Abstraction
+Decomposition
+Generalisation
+Algorithmic thinking
+Debugging
+ # preservice teachers in 2020
+4
+12
+2
+18
+15
+
+     FIGURE 2 Distribution of the elements of computational thinking observed in classrooms as foregrounded by the preservice teachers [Colour figure can be viewed at wileyonlinelibrary.com]
+
+ 1070 | BUTLER and LEAHY
+ In contrast, the following extract document the children's developing skills, describing an approach to decomposition, the debugging practices observed (exploration/trial & error) as well the step-by-step approaches adopted in specific tasks (also cf. SM:E7).
+... three of the groups showed early stages of the skill [debugging]. ... One team in particular, then began to look at their code and tried to find where the error was. Through trial and error, they came to the conclusion that the arrows on the motor direction had something to offer to their problem. They then had a discus- sion around what they could mean and began to explain how they visualised the motor working when using each block, both arguing in favour of the opposite block. To decide on which block was correct, they created two sample codes, one using the clockwise, and the other using the anti-clockwise motor block. After testing the two codes, they concluded that the clockwise code made the machine move forward as they had hoped. ...Through discussion and debug- ging, this team identified their problem, tried various ways to fix it, found the root of the problem and in turn, found a solution. (PST#16)
+Finally, the depth of the preservice teachers' understandings was illustrated through their ability to make interconnections between the elements of CT as well as their ability to make connections between the development of CT and constructionism. More specifically, many of them identified that the ability to manipulate the objects created, supported the development of concrete ways of developing CT (ie, ‘objects to think with’).
+The ‘object to think with’ had a symbiotic role to play with debugging as it allowed children to physically see how the code ran with their robotic build. This allowed them to discuss issues which arose, possible solutions and visually explore the different possibilities of coding blocks during the trial and error phase. (PST#23)
+(also cf. SM:C10/G10)
+Knowledge of how to develop the children's CT
+In addition to identifying elements of CT in the children's work, the preservice teachers also demonstrated knowledge of how to develop the children's CT, indicating that they understood why they were designing particular challenges that they set for the children ie, to develop specific aspects of CT. This entailed the identification of gaps in the children's knowledge of CT, the use of targeted activities as well as the utilisation of teaching strategies such as modelling, questioning and gradual withdrawal. This was summarised in Focus Group#1 where it was noted that because ‘you knew about CT before you went into the school. When you went into the school, you were able to identify skills in the children's practice, but you were also able to identify those that were missing, and then you were able to plan how to begin to develop those skills’.
+Observations and reflections after each class informed planning for the following week in that ‘All of the data we collected (observation templates, evidence sheets etc.) ... informed some of our decisions for the following lessons and observation days’ (PST#30). Across the groups, this tended to focus on the development of a particular CT skill/element. The follow- ing extract (Figure 3) is representative of the reflection and planning that occurred. In this instance, the group of preservice teachers had identified that the children were ‘not using the skill of decomposition when they were faced with problems within their construction and
+
+COMPUTATIONAL THINKING: A CONSTRUCTIONIST
+APPROACH | 1071
+programming’. Consequently, they targeted this skill in the subsequent activity by focussing the children's attention on breaking down the task into manageable steps.
+Strategies used to develop CT in children
+The preservice teachers articulated a range of teaching strategies which they used in the development of CT. These mainly included questioning and modelling but they also made use of group discussion, and targeted activities. Questioning emerged as a key strategy (ie, prompting and/or the use of focus questions) in that the preservice teachers consistently emphasised how they had accorded particular attention to the preparation of questions (cf. SM:C13/E13/G13/I13). One group stated that they had explicitly planned a set of questions (see Figure 4) in advance to guide the children ‘to think algorithmically and to in turn, debug the programming’ (PST#10).
+Other strategies included modelling, whole class discussion, discussion of problems in non-technical terms before introducing the technical language, and the use of targeted ac- tivities (cf. SM:C15/E15/G15/I15).
+The design of the learning environment and CT
+The second theme focuses on preservice teacher perception of the design of the learn- ing environment within the specialism and how it contributed to their learning. Three main findings emerged; first, the developmental, progressive and experiential nature of the spe- cialism gradually deepened their knowledge, second the immersive classroom experience ‘brought the theory to life’, and third, the research element of the classroom experience both heightened preservice teachers' understandings of CT and constructionism and helped to bridge the theory/practice gap (cf. Table S2).
+Developmental progressive and experiential nature of the specialism
+In each of the focus group interviews, the preservice teachers asserted that the ‘structure’ or design of the specialism worked to gradually deepen and expand their understanding of CT. In the early modules, they believed that they were ‘exploring the components’ before moving on to apply this knowledge with Scratch and the Lego WeDo materials and then, later with the children in the classroom experience (cf. SM:C21/E21).
+   FIGURE 3 Extract from Essay of PST#10
+
+ 1072 | BUTLER and LEAHY
+  FIGURE 4 ExtractfromessayofPST#10illustratingquestionsdevelopedbythegroup
+The experiential nature of the specialism also emerged as significant. The preservice teachers explicitly articulated how the pedagogical approaches they experienced during workshops informed the pedagogical approaches they subsequently used as part of their classroom experience (also cf. SM:C23).
+...we took from what XXX and you were doing with us and applied that... sup- pose the sort of scaffolding of the tasks and thinking about how to go about solving it, like the questions, the probing questions and the scaffolding that you were doing, for the different tasks and applying that. (FocusGroup#5)
+Importance of the classroom experience
+The importance of the classroom experience towards deepening understanding of CT and constructionism was one of the key findings. It was strongly emphasised by all preservices that the experience of working with children not only brought the theory ‘to life’ but helped them to deepen their personal understandings. Specifically, it led them to reflect more deeply on the fundamentals of CT and constructionism as well as develop their understandings of what CT looks like ‘in action’ (also cf. SM:E25).
+... I found that this [classroom experience] was a most beneficial experience. As part of our major specialism we have focused on constructionism and CT and we have engaged with the LEGO materials ... Therefore, for me it was an insightful experience and an opportunity to put my learning into practice and to understand from a teacher's perspective how children engage with the materi- als. ... I learned so much from this experience in both my teaching methodol- ogies and in my own learning. I now have a greater understanding of CT from the perspective of designing learning activities to develop these skills and from observing the children engaging in the activities and seeing first hand CT skills being developed from week to week. (PST#24)
+
+COMPUTATIONAL THINKING: A CONSTRUCTIONIST
+APPROACH | 1073
+Bridging theory and practice
+Finally, the preservice teachers signalled the role of the research they had carried out as part of the classroom experience as critical towards bridging the theory/practice gap. Specifically, they cited analysis of the data they had collected as being instrumental in help- ing them to further refine and deepen their personal understandings of CT (also cf. SM:C28).
+During the course of this research project, I have learned a lot about computa- tional thinking and constructionism that I could not have learned through doing desk-based research on the topics. This has been a very reflective process in which I have considered my own experiences as well as learning from the pupil's experiences. (PST40)
